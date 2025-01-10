@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Proveedores</h2>
+    <ul>
+        {% for provider in providers %}
+            <li>
+                <a href="{% url 'provider_detail' provider.email %}">
+                    {{ provider.first_name }} {{ provider.last_name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
