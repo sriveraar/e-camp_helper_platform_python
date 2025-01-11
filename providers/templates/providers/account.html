@@ -1,16 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Mi cuenta</h2>
-    <form method="post">
-        {% csrf_token %}
-        <label for="first_name">Nombre:</label>
-        <input type="text" name="first_name" id="first_name" value="{{ provider.first_name }}">
-        <label for="last_name">Apellido:</label>
-        <input type="text" name="last_name" id="last_name" value="{{ provider.last_name }}">
-        <label for="contact_number">Teléfono:</label>
-        <input type="text" name="contact_number" id="contact_number" value="{{ provider.contact_number }}">
-        <label for="detailed_description">Descripción:</label>
-        <textarea name="detailed_description" id="detailed_description">{{ provider.detailed_description }}</textarea>
-        <button type="submit">Guardar cambios</button>
-    </form>
+<h2>Mi cuenta</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar cambios</button>
+</form>
+
+<h3>Servicios seleccionados</h3>
+<ul>
+    {% for service in provider.services.all %}
+        <li>{{ service.name }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Mensajes recibidos</h3>
+<ul>
+    {% for message in messages %}
+        <li>
+            <strong>{{ message.sender_name }}</strong>: {{ message.content }}
+            <small>{{ message.created_at }}</small>
+        </li>
+    {% endfor %}
+</ul>
 {% endblock %}

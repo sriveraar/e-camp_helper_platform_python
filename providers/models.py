@@ -1,16 +1,25 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-class Provider(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='provider_profile')
-    profile_picture = models.ImageField(upload_to='profile_pictures/')
-    availability_hours = models.CharField(max_length=255, help_text="Formato: Lunes a Viernes, 9:00 AM - 6:00 PM")
-    phone = models.CharField(max_length=20)
-    description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+class Service(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}"
+        return self.name
+
+
+class Provider(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email = models.EmailField()
+    atencion = models.CharField(max_length=100)
+    telefono = models.CharField(max_length=15)
+    nombres = models.CharField(max_length=100)
+    apellidos = models.CharField(max_length=100)
+    descripcion = models.TextField()
+    foto = models.ImageField(upload_to='provider_photos/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.nombres} {self.apellidos}"
 
 class Message(models.Model):
     provider = models.ForeignKey(Provider, related_name='messages', on_delete=models.CASCADE)

@@ -1,9 +1,65 @@
 {% extends "base.html" %}
+
 {% block content %}
-    <h2>Crear cuenta</h2>
-    <form method="post">
+    <h2 id="crear_cuenta">Crear Cuenta Proveedores</h2>
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Registrar</button>
+        
+        <!-- Fila 1: Email y Horario de Atención -->
+        <div class="row">
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" required>
+            </div>
+            <div>
+                <label for="atencion">Horario de Atención:</label>
+                <input type="text" name="atencion" id="atencion" required>
+            </div>
+        </div>
+
+        <!-- Fila 2: Contraseña y Teléfono de Contacto -->
+        <div class="row">
+            <div>
+                <label for="password">Contraseña:</label>
+                <input type="password" name="password" id="password" required>
+            </div>
+            <div>
+                <label for="telefono">Teléfono de Contacto:</label>
+                <input type="tel" name="telefono" id="telefono" required>
+            </div>
+        </div>
+
+        <!-- Fila 3: Nombres y Descripción -->
+        <div class="row">
+            <div>
+                <label for="nombres">Nombres:</label>
+                <input type="text" name="nombres" id="nombres" required>
+            </div>
+            <div>
+                <label for="descripcion">Descripción:</label>
+                <textarea name="descripcion" id="descripcion" required></textarea>
+            </div>
+        </div>
+
+        <!-- Fila 4: Apellidos -->
+        <div class="row">
+            <div>
+                <label for="apellidos">Apellidos:</label>
+                <input type="text" name="apellidos" id="apellidos" required>
+            </div>
+        </div>
+
+        <!-- Fila 5: Foto -->
+        <div class="row">
+            <div>
+                <label for="foto">Seleccionar Foto:</label>
+                <input type="file" name="foto" id="foto">
+            </div>
+        </div>
+
+        <!-- Fila 6: Botón Crear Cuenta -->
+        <div class="row">
+            <button type="submit">Crear Cuenta</button>
+        </div>
     </form>
 {% endblock %}
