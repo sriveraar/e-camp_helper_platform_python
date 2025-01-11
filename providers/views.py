@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
-from .models import Provider, Service
+from .models import Provider, Message
 
 # Página principal
 def v_index(request):
@@ -35,7 +35,7 @@ def v_iniciar_sesion(request):
             return redirect('account')
         else:
             return render(request, 'providers/login.html', {'error': 'Credenciales inválidas'})
-    return render(request, 'login.html')
+    return render(request, 'providers/login.html')
 
 # Gestión del perfil del proveedor
 @login_required
