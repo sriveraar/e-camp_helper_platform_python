@@ -4,6 +4,7 @@
 <head>
     {% load static %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <title>Ayudante</title>
 </head>
@@ -20,7 +21,12 @@
             </div>
             <div class="navbar_accesos">
                 <li><a id="navbar_boton_crear" href="{% url 'create_account' %}">Crear Cuenta</a></li>
-                <li><a id="navbar_boton_iniciar" href="{% url 'login' %}">Iniciar Sesión</a></li>
+                
+                {% if user.is_authenticated %}
+                    <li><a id="navbar_boton_cerrar" href="{% url 'logout' %}">Cerrar Sesión</a></li>
+                {% else %}
+                    <li><a class="navbar_boton_iniciar" href="{% url 'login' %}">Iniciar Sesión</a></li>
+                {% endif %}
             </div>
         </ul>
     </nav>

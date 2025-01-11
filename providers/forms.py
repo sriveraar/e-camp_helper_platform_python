@@ -1,35 +1,29 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Provider
+from .models import Provider, ProviderProfile, Service
 
-class ProviderForm(UserCreationForm):
-    email = forms.EmailField()
-    atencion = forms.CharField(max_length=100)
-    telefono = forms.CharField(max_length=15)
-    nombres = forms.CharField(max_length=100)
-    apellidos = forms.CharField(max_length=100)
-    descripcion = forms.CharField(widget=forms.Textarea)
-    foto = forms.ImageField(required=False)
+class ProviderForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
-        model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        model = Provider
+        fields = ['email', 'atencion', 'telefono', 'nombres', 'apellidos', 'descripcion', 'foto']
 
     def save(self, commit=True):
-        user = super().save(commit=False)
+        provider = super().save(commit=False)
         if commit:
-            user.save()
-            # Crear el perfil del proveedor
-            provider = Provider(
-                user=user,
-                email=self.cleaned_data['email'],
-                atencion=self.cleaned_data['atencion'],
-                telefono=self.cleaned_data['telefono'],
-                nombres=self.cleaned_data['nombres'],
-                apellidos=self.cleaned_data['apellidos'],
-                descripcion=self.cleaned_data['descripcion'],
-                foto=self.cleaned_data['foto']
-            )
+            user = User.objects.create_user(username=self.cleaned_data['email'], password=self.cleaned_data['password'])
+            provider.user = user
             provider.save()
-        return user
+        return provider
+
+class ProviderProfileForm(forms.ModelForm):
+    class Meta:
+        model = ProviderProfile
+        fields = ['services']  # Los servicios que el proveedor ofrece
+
+    services = forms.ModelMultipleChoiceField(
+        queryset=Service.objects.all(),
+        widget=forms.CheckboxSelectMultiple,  # Para mostrar como casillas de verificación
+        required=False
+    )

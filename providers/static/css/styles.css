@@ -59,15 +59,22 @@ button:hover {
 #navbar_boton_crear{
     background-color: blue;
     color: white;
-    padding: 10px;
-    border-radius: 15px;
+    padding: 15px 10px;
+    border-radius: 20px;
 }
 
-#navbar_boton_iniciar{
+.navbar_boton_iniciar{
     background-color: green;
     color: white;
-    padding: 10px;
-    border-radius: 15px;
+    padding: 15px 10px;
+    border-radius: 20px;
+}
+
+#navbar_boton_cerrar{
+    background-color: darkred;
+    color: white;
+    padding: 15px 10px;
+    border-radius: 20px;
 }
 
 .navbar li {

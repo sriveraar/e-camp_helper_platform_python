@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block content %}
 <h2>Mi cuenta</h2>
 <form method="post" enctype="multipart/form-data">
@@ -10,7 +11,22 @@
 <h3>Servicios seleccionados</h3>
 <ul>
     {% for service in provider.services.all %}
-        <li>{{ service.name }}</li>
+        <li class="bg-success text-white p-2">{{ service.name }}</li>
+    {% empty %}
+        <li>No has seleccionado servicios aún.</li>
+    {% endfor %}
+</ul>
+
+<h3>Servicios disponibles</h3>
+<ul>
+    {% for service in available_services %}
+        <li>
+            <label>
+                <input type="checkbox" name="services" value="{{ service.id }}" 
+                    {% if service in provider.services.all %} checked {% endif %}>
+                {{ service.name }}
+            </label>
+        </li>
     {% endfor %}
 </ul>
 

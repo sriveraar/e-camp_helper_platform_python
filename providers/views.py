@@ -1,11 +1,29 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
-from .models import Provider, Service
-from .forms import ProviderForm
-from django.contrib.auth import logout
+from .models import Provider, Service, ProviderProfile
+from .forms import ProviderForm, ProviderProfileForm
+from django.contrib.auth import logout, authenticate, login
+from django.contrib import messages
+
+
+from django.contrib.auth.models import User
+
+def v_iniciar_sesion(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        password = request.POST['password']
+        
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('account')
+        else:
+            messages.error(request, 'Email o contraseña incorrectos')
+            return redirect('login')
+
+    return render(request, 'providers/login.html')
 
 
 # Página principal
@@ -16,24 +34,28 @@ def v_index(request):
 
 # Registro de nuevos proveedores
 def v_crear_cuenta(request):
-    """Vista para registrar un nuevo proveedor."""
     if request.method == 'POST':
         form = ProviderForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('login')  # Redirige al login después de crear la cuenta
+            # Solo crear el perfil de proveedor sin usuario
+            provider = form.save()
+            return redirect('login')  # Redirige al login después de la creación del proveedor
     else:
         form = ProviderForm()
+
     return render(request, 'providers/create_account.html', {'form': form})
 
 # Vista para crear el perfil de proveedor
 @login_required
 def v_crear_perfil_proveedor(request):
     """Vista para que un usuario cree su perfil de proveedor."""
+    if hasattr(request.user, 'provider_profile'):
+        # El usuario ya tiene un perfil de proveedor
+        return redirect('account')
+
     if request.method == 'POST':
         form = ProviderForm(request.POST, request.FILES)
         if form.is_valid():
-            # Asignar el perfil de proveedor al usuario actual
             provider = form.save(commit=False)
             provider.user = request.user
             provider.save()
@@ -43,41 +65,36 @@ def v_crear_perfil_proveedor(request):
 
     return render(request, 'providers/create_provider_profile.html', {'form': form})
 
-
-# Iniciar sesión
-def v_iniciar_sesion(request):
-    """Vista para iniciar sesión."""
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('account')
-        else:
-            return render(request, 'providers/login.html', {'error': 'Credenciales inválidas'})
-    return render(request, 'providers/login.html')
-
 # Gestión del perfil del proveedor
 @login_required
 def v_mi_cuenta(request):
-    """Vista para gestionar el perfil del proveedor."""
+    # Obtén el perfil del proveedor (si no existe, redirige)
     try:
-        provider = request.user.provider_profile
-    except Provider.DoesNotExist:
-        # Redirige a la página de creación de perfil de proveedor
-        return redirect('create_provider_profile')  # Redirige si no existe el perfil de proveedor
+        provider_profile = request.user.provider_profile
+    except ProviderProfile.DoesNotExist:
+        provider_profile = None
 
+    # Si el proveedor no tiene perfil, puedes redirigir a un formulario de creación de perfil
+    if provider_profile is None:
+        return redirect('create_provider_profile')
+
+    # Si el proveedor tiene perfil, manejar la edición de servicios
     if request.method == 'POST':
-        form = ProviderForm(request.POST, request.FILES, instance=provider)
+        form = ProviderProfileForm(request.POST, instance=provider_profile)
         if form.is_valid():
             form.save()
-            return redirect('account')
+            return redirect('mi_cuenta')  # Redirigir después de guardar los cambios
     else:
-        form = ProviderForm(instance=provider)
-    messages = provider.messages.all()
-    return render(request, 'providers/account.html', {'form': form, 'messages': messages})
+        form = ProviderProfileForm(instance=provider_profile)
 
+    # Obtener los servicios disponibles
+    available_services = Service.objects.all()
+
+    return render(request, 'account.html', {
+        'form': form,
+        'provider': provider_profile,
+        'available_services': available_services,
+    })
 
 # Detalle del proveedor
 def v_detalle_proveedor(request, email):
@@ -108,7 +125,6 @@ def v_cuenta_remover_servicio(request):
         provider.services.remove(service)
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'})
-
 
 # Cerrar sesión
 def v_cerrar_sesion(request):
