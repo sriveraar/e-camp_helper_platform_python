@@ -52,11 +52,16 @@ class Message(models.Model):
 
 # Modelo de perfil de proveedor (con relación a User)
 class ProviderProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='provider_profile'
+    )
+
+    def __str__(self):
+        return f"Perfil de {self.user.username}"
+
 
 def create_provider_profile(user):
     if not hasattr(user, 'provider_profile'):
         ProviderProfile.objects.create(user=user)
-        
-    def __str__(self):
-        return f"Perfil de {self.user.username}"

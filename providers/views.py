@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Provider, Service, ProviderProfile
+from .models import Provider, Service, ProviderProfile, Message
 from .forms import ProviderForm, ProviderProfileForm
-from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth import logout, authenticate, login, update_session_auth_hash
 from django.contrib import messages
 from django.contrib.auth.models import User
 
@@ -104,26 +104,21 @@ def v_crear_perfil_proveedor(request):
 def v_mi_cuenta(request):
     try:
         provider_profile = request.user.provider_profile
-    except ProviderProfile.DoesNotExist:
-        provider_profile = None
-
-    # Si el proveedor no tiene perfil, redirige a la creación de perfil
-    if provider_profile is None:
+    except AttributeError:
         messages.warning(request, 'No tienes un perfil de proveedor. Por favor, crea uno.')
         return redirect('create_provider_profile')
 
-    # Si el proveedor tiene perfil, manejar la edición de servicios
     if request.method == 'POST':
         form = ProviderProfileForm(request.POST, instance=provider_profile)
         if form.is_valid():
             form.save()
-            return redirect('mi_cuenta')  # Redirigir después de guardar los cambios
+            return redirect('account')
     else:
         form = ProviderProfileForm(instance=provider_profile)
 
     available_services = Service.objects.all()
 
-    return render(request, 'account.html', {
+    return render(request, 'providers/account.html', {
         'form': form,
         'provider': provider_profile,
         'available_services': available_services,
@@ -170,7 +165,46 @@ def v_cuenta_remover_servicio(request):
     return JsonResponse({'status': 'error'})
 
 
+@login_required
+def editar_datos(request):
+    try:
+        provider = Provider.objects.get(user=request.user)
+    except Provider.DoesNotExist:
+        provider = None
+
+    messages_received = Message.objects.filter(provider=provider) if provider else []
+
+    if request.method == 'POST':
+        provider.nombres = request.POST.get('nombres', provider.nombres)
+        provider.telefono = request.POST.get('telefono', provider.telefono)
+        provider.apellidos = request.POST.get('apellidos', provider.apellidos)
+        provider.descripcion = request.POST.get('descripcion', provider.descripcion)
+        provider.atencion = request.POST.get('atencion', provider.atencion)
+
+        # Verificar si se ha subido una nueva foto
+        if request.FILES.get('foto'):
+            provider.foto = request.FILES['foto']
+
+        # Actualizar la contraseña si se ha proporcionado una nueva
+        password = request.POST.get('password')
+        if password:
+            provider.user.set_password(password)
+            provider.user.save()
+            update_session_auth_hash(request, provider.user)  # Mantener al usuario logueado después de cambiar la contraseña
+        
+        provider.save()
+        
+        messages.success(request, "Tus datos han sido actualizados exitosamente.")
+        return redirect('editar_datos')
+    
+    return render(request, 'editar_datos.html', {
+        'provider': provider,
+        'messages': messages_received
+    })
+
+    
+
 # Cerrar sesión
 def v_cerrar_sesion(request):
     logout(request)
-    return redirect('index')  # Redirige a la página principal después de cerrar sesión
+    return redirect('index')
