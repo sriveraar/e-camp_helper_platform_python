@@ -1,23 +1,7 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-    <h2>Proveedores</h2>
+    <h1>Bienvenido a nuestra plataforma</h1>
     
-    {% if user.is_authenticated %}
-        <!-- Enlace para cerrar sesión si el usuario está autenticado -->
-        <p><a href="{% url 'logout' %}">Cerrar sesión</a></p>
-    {% else %}
-        <!-- Enlace para iniciar sesión si el usuario no está autenticado -->
-        <p><a href="{% url 'login' %}">Iniciar sesión</a></p>
-    {% endif %}
-    
-    <ul>
-        {% for provider in providers %}
-            <li>
-                <a href="{% url 'provider_detail' provider.email %}">
-                    {{ provider.first_name }} {{ provider.last_name }}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+    {% include 'providers_list.html' %}
 {% endblock %}

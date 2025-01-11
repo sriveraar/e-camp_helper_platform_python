@@ -103,26 +103,28 @@ def v_crear_perfil_proveedor(request):
 @login_required
 def v_mi_cuenta(request):
     try:
-        provider_profile = request.user.provider_profile
-    except AttributeError:
+        provider = Provider.objects.get(user=request.user)
+    except Provider.DoesNotExist:
         messages.warning(request, 'No tienes un perfil de proveedor. Por favor, crea uno.')
         return redirect('create_provider_profile')
 
     if request.method == 'POST':
-        form = ProviderProfileForm(request.POST, instance=provider_profile)
-        if form.is_valid():
-            form.save()
-            return redirect('account')
-    else:
-        form = ProviderProfileForm(instance=provider_profile)
+        provider.nombres = request.POST.get('nombres', provider.nombres)
+        provider.apellidos = request.POST.get('apellidos', provider.apellidos)
+        provider.descripcion = request.POST.get('descripcion', provider.descripcion)
+        provider.telefono = request.POST.get('telefono', provider.telefono)
+        provider.atencion = request.POST.get('atencion', provider.atencion)
+        
+        # Actualizar la foto si se subió una nueva
+        if 'foto' in request.FILES:
+            provider.foto = request.FILES['foto']
+        
+        provider.save()
+        messages.success(request, "Tu información ha sido actualizada correctamente.")
+        return redirect('account')
 
-    available_services = Service.objects.all()
+    return render(request, 'providers/account.html', {'provider': provider})
 
-    return render(request, 'providers/account.html', {
-        'form': form,
-        'provider': provider_profile,
-        'available_services': available_services,
-    })
 
 
 # Detalle del proveedor
@@ -202,7 +204,16 @@ def editar_datos(request):
         'messages': messages_received
     })
 
-    
+# Obtener todos los proveedores registrados
+def index(request):
+    all_providers = Provider.objects.all()
+    return render(request, 'providers/providers_list.html', {'all_providers': all_providers})
+
+def ver_proveedor(request, id):
+    # Obtener el proveedor por su id
+    provider = get_object_or_404(Provider, id=id)
+
+    return render(request, 'ver_proveedor.html', {'provider': provider})
 
 # Cerrar sesión
 def v_cerrar_sesion(request):

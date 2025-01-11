@@ -1,0 +1,16 @@
+<div class="container">
+    <h2>Proveedores Registrados</h2>
+    <div class="providers-list">
+        {% for provider in all_providers %}
+            <div class="provider-card">
+                <a href="{% url 'ver_proveedor' provider.id %}">
+                    <img src="{{ provider.foto.url if provider.foto else '/static/default.jpg' }}" alt="{{ provider.nombres }}" class="provider-image">
+                    <h4>{{ provider.nombres }} {{ provider.apellidos }}</h4>
+                    <p>{{ provider.descripcion|truncatewords:15 }}</p>
+                </a>
+            </div>
+        {% empty %}
+            <p>No hay proveedores registrados.</p>
+        {% endfor %}
+    </div>
+</div>
