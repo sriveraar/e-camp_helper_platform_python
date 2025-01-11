@@ -204,16 +204,19 @@ def editar_datos(request):
         'messages': messages_received
     })
 
-# Obtener todos los proveedores registrados
 def index(request):
-    all_providers = Provider.objects.all()
-    return render(request, 'providers/providers_list.html', {'all_providers': all_providers})
+    return render(request, 'index.html')
+
 
 def ver_proveedor(request, id):
     # Obtener el proveedor por su id
     provider = get_object_or_404(Provider, id=id)
 
     return render(request, 'ver_proveedor.html', {'provider': provider})
+
+def ver_proveedores(request):
+    all_providers = Provider.objects.all()
+    return render(request, 'providers/providers_list.html', {'all_providers': all_providers})
 
 # Cerrar sesión
 def v_cerrar_sesion(request):

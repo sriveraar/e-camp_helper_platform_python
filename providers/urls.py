@@ -13,6 +13,7 @@ urlpatterns = [
     path('mi-cuenta/incluir-servicio/', views.v_cuenta_incluir_servicio, name='add_service'),
     path('mi-cuenta/remover-servicio/', views.v_cuenta_remover_servicio, name='remove_service'),
     path('crear-perfil/', views.v_crear_perfil_proveedor, name='create_provider_profile'),
+    path('proveedores/', views.ver_proveedores, name='ver_proveedores'),
     path('proveedor/<int:id>/', views.ver_proveedor, name='ver_proveedor'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

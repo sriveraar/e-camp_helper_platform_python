@@ -18,7 +18,7 @@ class Provider(models.Model):
     nombres = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
     descripcion = models.TextField()
-    foto = models.ImageField(upload_to='provider_photos/', null=True, blank=True)
+    foto = models.ImageField(upload_to='providers/', null=True, blank=True)
     services = models.ManyToManyField(Service, through='ProviderService')
 
     def __str__(self):
